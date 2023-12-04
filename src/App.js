@@ -2,31 +2,35 @@ import './App.css';
 import { useState, useRef } from 'react';
 
 function App() {
+  const [isRunning, setIsRunning] = useState(false)
   const [currentMark, setCurrentMark] = useState(0)
   const [laps, setLaps] = useState([])
-  const [hasData, setHasData] = useState(true)
 
   const interval = useRef()
   const startTime = useRef()
 
   function handleResetTimer() {
-    if (!hasData) {
+    if (isRunning) {
+      setIsRunning(false)
+      clearInterval(interval.current)
+    } else {
       setCurrentMark(0);
       setLaps([])
-    } else {
-      setHasData(false)
     }
-    clearInterval(interval.current)
   }
 
   function handleStartTimer() {
-    startTime.current = Date.now()
-    interval.current = setInterval(() => setCurrentMark(Date.now() - startTime.current), 50)
+    if (!isRunning) {
+      startTime.current = Date.now()
+      interval.current = setInterval(() => setCurrentMark(Date.now() - startTime.current), 50)
+      setIsRunning(true)
+    }
   }
 
   function handlerNewLap() {
-    setLaps([currentMark, ...laps])
-    setHasData(true)
+    if (isRunning) {
+      setLaps([currentMark, ...laps])
+    }
   }
 
   return (
@@ -42,7 +46,7 @@ function App() {
         </div>
         <div className="laps"></div>
         <ul>
-          {laps.map((lap) => <li>{(lap / 1000).toFixed(2)}</li>)}
+          {laps.map((lap) => <li key={lap}>{(lap / 1000).toFixed(2)}</li>)}
         </ul>
       </div>
     </div>
